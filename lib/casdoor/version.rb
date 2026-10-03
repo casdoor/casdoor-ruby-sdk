@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright 2026 The Casdoor Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,5 +15,5 @@
 # limitations under the License.
 
 module Casdoor
-  VERSION = '0.1.0'
+  VERSION = '1.0.0'
 end
