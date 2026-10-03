@@ -14,11 +14,16 @@
 
 require 'securerandom'
 
-TestCasdoorEndpoint = "https://demo.casdoor.com"
-TestClientId = "294b09fbc17f95daf2fe"
-TestClientSecret = "dd8982f7046ccba1bbd7851d5c1ece4e52bf039d"
-TestCasdoorOrganization = "casbin"
-TestCasdoorApplication = "app-vue-python-example"
+def get_test_env(key, default_value)
+  value = ENV.fetch(key, "")
+  value.empty? ? default_value : value
+end
+
+TestCasdoorEndpoint = get_test_env("CASDOOR_TEST_ENDPOINT", "http://localhost:8000")
+TestClientId = get_test_env("CASDOOR_TEST_CLIENT_ID", "casdoor-ruby-sdk-ci-client")
+TestClientSecret = get_test_env("CASDOOR_TEST_CLIENT_SECRET", "casdoor-ruby-sdk-ci-secret")
+TestCasdoorOrganization = get_test_env("CASDOOR_TEST_ORGANIZATION", "casbin")
+TestCasdoorApplication = get_test_env("CASDOOR_TEST_APPLICATION", "app-vue-python-example")
 TestJwtPublicKey = <<-CERTIFICATE
 -----BEGIN CERTIFICATE-----
 MIIE+TCCAuGgAwIBAgIDAeJAMA0GCSqGSIb3DQEBCwUAMDYxHTAbBgNVBAoTFENh

@@ -17,10 +17,58 @@ require 'net/http'
 require 'uri'
 
 module CasdoorSdk
+  # Converts between the snake_case attributes of the SDK and the camelCase JSON fields of Casdoor
+  module JsonFields
+    def self.to_snake(key)
+      key.to_s.gsub(/([a-z\d])([A-Z])/, '\1_\2').downcase.to_sym
+    end
+
+    def self.to_camel(key)
+      head, *tail = key.to_s.split('_')
+      ([head] + tail.map { |word| word[0].upcase + word[1..-1] }).join
+    end
+
+    def self.dump(value)
+      case value
+      when Array then value.map { |item| dump(item) }
+      when JsonObject then value.to_h
+      else value
+      end
+    end
+  end
+
+  # Keeps the fields returned by Casdoor that the SDK doesn't model, so that updating an object doesn't clear them
+  module JsonObject
+    def to_h
+      hash = (@json_fields || {}).transform_keys { |key| JsonFields.to_camel(key) }
+      instance_variables.each do |var|
+        next if var == :@json_fields
+
+        value = instance_variable_get(var)
+        hash[JsonFields.to_camel(var.to_s.delete('@'))] = JsonFields.dump(value) unless value.nil?
+      end
+      hash
+    end
+
+    def to_json(*args)
+      to_h.to_json(*args)
+    end
+
+    private
+
+    def json_params(params)
+      @json_fields = params
+      params.each_with_object({}) { |(key, value), hash| hash[JsonFields.to_snake(key)] = value }
+    end
+  end
+
   class ProviderItem
+    include JsonObject
+
     attr_accessor :owner, :name, :can_sign_up, :can_sign_in, :can_unlink, :prompted, :alert_type, :rule, :provider
 
     def initialize(params)
+      params = json_params(params)
       @owner = params[:owner]
       @name = params[:name]
       @can_sign_up = params[:can_sign_up]
@@ -34,9 +82,12 @@ module CasdoorSdk
   end
 
   class SignupItem
+    include JsonObject
+
     attr_accessor :name, :visible, :required, :prompted, :rule
 
     def initialize(params)
+      params = json_params(params)
       @name = params[:name]
       @visible = params[:visible]
       @required = params[:required]
@@ -46,6 +97,8 @@ module CasdoorSdk
   end
 
   class Application
+    include JsonObject
+
     attr_accessor :owner, :name, :created_time, :display_name, :logo, :homepage_url, :description, :organization,
                   :cert, :enable_password, :enable_sign_up, :enable_signin_session, :enable_auto_signin,
                   :enable_code_signin, :enable_saml_compress, :enable_web_authn, :enable_link_with_email,
@@ -56,6 +109,7 @@ module CasdoorSdk
                   :form_offset, :form_side_html, :form_background_url
 
     def initialize(params)
+      params = json_params(params)
       @owner = params[:owner]
       @name = params[:name]
       @created_time = params[:created_time]
@@ -109,74 +163,80 @@ module CasdoorSdk
       @auth_config = auth_config
     end
 
-    def get_url(action, query_map)
-      URI::HTTP.build({
-                        host: @auth_config[:endpoint],
-                        path: "/api/#{action}",
-                        query: URI.encode_www_form(query_map)
-                      })
+    def get_url(action, query_map = {})
+      url = "#{@auth_config[:endpoint].chomp('/')}/api/#{action}"
+      url += "?#{URI.encode_www_form(query_map)}" unless query_map.empty?
+      URI(url)
     end
 
     def do_get_bytes(url)
-      Net::HTTP.get(url)
+      do_request(url, Net::HTTP::Get.new(url))
+    end
+
+    def do_post(url, body)
+      request = Net::HTTP::Post.new(url, 'Content-Type' => 'application/json')
+      request.body = body.to_json
+      do_request(url, request)
     end
 
     def get_applications
       query_map = { "owner" => "admin" }
       url = get_url("get-applications", query_map)
 
-      response = do_get_bytes(url)
-      data = JSON.parse(response, symbolize_names: true)
-
+      data = do_get_bytes(url) || []
       data.map { |app_data| Application.new(app_data) }
     end
 
     def get_organization_applications(owner)
-      query_map = { "owner" => owner }
+      query_map = { "owner" => "admin", "organization" => owner }
       url = get_url("get-organization-applications", query_map)
 
-      response = do_get_bytes(url)
-      data = JSON.parse(response, symbolize_names: true)
-
+      data = do_get_bytes(url) || []
       data.map { |app_data| Application.new(app_data) }
     end
 
     def get_application(owner, name)
-      query_map = { "owner" => owner, "name" => name }
+      query_map = { "id" => "#{owner}/#{name}" }
       url = get_url("get-application", query_map)
 
-      response = do_get_bytes(url)
-      data = JSON.parse(response, symbolize_names: true)
-
-      Application.new(data)
+      data = do_get_bytes(url)
+      data && Application.new(data)
     end
 
     def add_application(application)
-      url = get_url("add-application", {})
-      uri = URI(url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
-      request.body = application.to_json
-      response = http.request(request)
-      JSON.parse(response.body, symbolize_names: true)
+      modify_application("add-application", application)
     end
 
     def delete_application(owner, name)
-      query_map = { "owner" => owner, "name" => name }
-      url = get_url("delete-application", query_map)
+      # Casdoor only deletes the application when its organization matches too
+      application = get_application(owner, name)
+      return false if application.nil?
 
-      response = do_get_bytes(url)
-      JSON.parse(response, symbolize_names: true)
+      modify_application("delete-application", application)
     end
 
     def update_application(application)
-      url = get_url("update-application", {})
-      uri = URI(url)
-      http = Net::HTTP.new(uri.host, uri.port)
-      request = Net::HTTP::Put.new(uri.path, 'Content-Type' => 'application/json')
-      request.body = application.to_json
-      response = http.request(request)
-      JSON.parse(response.body, symbolize_names: true)
+      modify_application("update-application", application)
+    end
+
+    private
+
+    def modify_application(action, application)
+      url = get_url(action, { "id" => "#{application.owner}/#{application.name}" })
+      do_post(url, application) == "Affected"
+    end
+
+    # Sends the request with the client ID and secret, and returns the data of the Casdoor response
+    def do_request(url, request)
+      request.basic_auth(@auth_config[:client_id], @auth_config[:client_secret])
+      response = Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == "https") do |http|
+        http.request(request)
+      end
+
+      body = JSON.parse(response.body)
+      raise body["msg"] if body["status"] == "error"
+
+      body["data"]
     end
   end
 end

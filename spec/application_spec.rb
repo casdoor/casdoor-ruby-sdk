@@ -46,7 +46,7 @@ module CasdoorSdk
                                     })
 
       begin
-        $casdoor_client.add_application(application)
+        assert($casdoor_client.add_application(application), "Failed to add object")
       rescue => e
         fail("Failed to add object: #{e}")
       end
@@ -75,7 +75,7 @@ module CasdoorSdk
       retrieved_application.description = updated_description
 
       begin
-        $casdoor_client.update_application(retrieved_application)
+        assert($casdoor_client.update_application(retrieved_application), "Failed to update object")
       rescue => e
         fail("Failed to update object: #{e}")
       end
@@ -91,7 +91,7 @@ module CasdoorSdk
 
       # Delete the object
       begin
-        $casdoor_client.delete_application("admin", name)
+        assert($casdoor_client.delete_application("admin", name), "Failed to delete object")
       rescue => e
         fail("Failed to delete object: #{e}")
       end
@@ -99,10 +99,11 @@ module CasdoorSdk
       # Validate the deletion
       begin
         deleted_application = $casdoor_client.get_application("admin", name)
-        fail("Failed to delete object, it's still retrievable") if deleted_application
       rescue => e
-        # Expected error, object should not be found
+        fail("Failed to get object: #{e}")
       end
+
+      assert_nil(deleted_application, "Failed to delete object, it's still retrievable")
     end
 
     def get_random_name(prefix)
