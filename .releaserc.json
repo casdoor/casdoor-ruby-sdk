@@ -1,0 +1,20 @@
+{
+  "branches": "master",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "sed -i \"s/VERSION = '.*'/VERSION = '${nextRelease.version}'/\" lib/casdoor/version.rb && gem build casdoor-ruby-sdk.gemspec",
+        "publishCmd": "gem push casdoor-ruby-sdk-${nextRelease.version}.gem"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [{ "path": "casdoor-ruby-sdk-*.gem" }]
+      }
+    ]
+  ]
+}

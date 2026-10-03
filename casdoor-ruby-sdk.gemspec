@@ -17,6 +17,8 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   s.required_ruby_version = '>= 2.7.0'
   s.metadata['rubygems_mfa_required'] = 'true'
+  s.metadata['source_code_uri'] = 'https://github.com/casdoor/casdoor-ruby-sdk'
+  s.metadata['changelog_uri'] = 'https://github.com/casdoor/casdoor-ruby-sdk/releases'
 
   s.add_dependency 'jwt', '>= 2.5', '< 4'
 end

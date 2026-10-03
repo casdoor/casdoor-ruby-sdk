@@ -15,5 +15,6 @@
 # limitations under the License.
 
 module Casdoor
+  # Set by semantic-release in CI when a new version is released, see .releaserc.json
   VERSION = '1.0.0'
 end

@@ -17,8 +17,10 @@ other objects of Casdoor through its API.
 Add it to the `Gemfile`:
 
 ```ruby
-gem 'casdoor-ruby-sdk', git: 'https://github.com/casdoor/casdoor-ruby-sdk'
+gem 'casdoor-ruby-sdk'
 ```
+
+or install it directly with `gem install casdoor-ruby-sdk`.
 
 It requires Ruby 2.7 or later, and depends only on the [jwt](https://github.com/jwt/ruby-jwt) gem.
 
