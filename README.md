@@ -1,6 +1,12 @@
 # casdoor-ruby-sdk
 
 [![CI](https://github.com/casdoor/casdoor-ruby-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/casdoor/casdoor-ruby-sdk/actions/workflows/ci.yml)
+[![Gem Version](https://img.shields.io/gem/v/casdoor-ruby-sdk.svg)](https://rubygems.org/gems/casdoor-ruby-sdk)
+[![Gem Downloads](https://img.shields.io/gem/dt/casdoor-ruby-sdk.svg)](https://rubygems.org/gems/casdoor-ruby-sdk)
+[![Ruby](https://img.shields.io/badge/ruby-%3E%3D%202.7-CC342D.svg?logo=ruby)](https://www.ruby-lang.org/)
+[![Code Style: RuboCop](https://img.shields.io/badge/code_style-rubocop-brightgreen.svg)](https://github.com/rubocop/rubocop)
+[![License](https://img.shields.io/github/license/casdoor/casdoor-ruby-sdk.svg)](LICENSE)
+[![Discord](https://img.shields.io/discord/1022748306096537660?logo=discord&label=discord&color=5865F2)](https://discord.gg/5rPsrAzK7S)
 
 The Ruby SDK of [Casdoor](https://casdoor.ai/). It lets a Ruby application (Rails, Sinatra, Hanami, ...) sign users in
 with Casdoor, verify the tokens issued by Casdoor, and manage the users, applications, roles, permissions and the
