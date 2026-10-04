@@ -28,23 +28,23 @@ module Casdoor
   # The LDAP APIs, the counterpart of ldap.go of the Go SDK
   class Client
     def get_ldaps
-      get_objects('get-ldaps', Ldap, 'owner' => 'admin')
+      get_objects('get-ldaps', Ldap, 'owner' => organization_name)
     end
 
     def get_ldap(id)
-      get_object('get-ldap', Ldap, 'id' => get_admin_id(id))
+      get_object('get-ldap', Ldap, 'id' => get_id(id))
     end
 
     def add_ldap(ldap)
-      modify_object('add-ldap', Ldap, ldap, 'admin')
+      modify_object('add-ldap', Ldap, ldap, organization_name)
     end
 
     def delete_ldap(ldap)
-      modify_object('delete-ldap', Ldap, ldap, 'admin')
+      modify_object('delete-ldap', Ldap, ldap, organization_name)
     end
 
     def update_ldap(ldap)
-      modify_object('update-ldap', Ldap, ldap, 'admin')
+      modify_object('update-ldap', Ldap, ldap, organization_name)
     end
 
     # The users in the LDAP server. Returns a hash like {"users" => [LdapUser], "existUuids" => [...]}.
