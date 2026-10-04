@@ -33,8 +33,10 @@ module Casdoor
       get_object('get-transaction', Transaction, 'id' => get_id(name))
     end
 
+    # Casdoor has no get-user-transactions API, get-transactions filters the transactions by user
     def get_user_transactions(user_name)
-      get_objects('get-user-transactions', Transaction, 'owner' => organization_name, 'user' => user_name)
+      get_objects('get-transactions', Transaction, 'owner' => organization_name, 'field' => 'user',
+                                                   'value' => user_name)
     end
 
     def update_transaction(transaction)

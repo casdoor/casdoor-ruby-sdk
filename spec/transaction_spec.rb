@@ -22,6 +22,7 @@ RSpec.describe 'Casdoor transaction API', :integration do
     transaction = Casdoor::Transaction.new(
       owner: 'casbin',
       created_time: Casdoor.get_current_time,
+      user: 'admin',
       state: 'Paid'
     )
     affected, transaction_id = Casdoor.add_transaction(transaction)
@@ -31,6 +32,10 @@ RSpec.describe 'Casdoor transaction API', :integration do
     # Get all objects, check if our added object is inside the list
     transactions = Casdoor.get_transactions
     expect(transactions.map(&:name)).to include(transaction_id)
+
+    # Get the objects of the user, check if our added object is inside the list
+    user_transactions = Casdoor.get_user_transactions('admin')
+    expect(user_transactions.map(&:name)).to include(transaction_id)
 
     # Get the object
     transaction = Casdoor.get_transaction(transaction_id)

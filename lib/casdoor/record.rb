@@ -29,8 +29,14 @@ module Casdoor
       get_pagination_objects('get-records', Record, organization_name, page, page_size, query_map)
     end
 
+    # Gets the record by name, or nil if it doesn't exist. Casdoor has no API to get a single record, so it searches
+    # the records by name. Like the other APIs that read records, it needs the access token of an admin user, see
+    # with_access_token().
     def get_record(name)
-      get_object('get-record', Record, 'id' => get_id(name))
+      name = name.to_s.split('/').last.to_s
+      # The name filter matches the records whose names contain the given name
+      records, = get_pagination_records(1, 100, 'field' => 'name', 'value' => name)
+      records.find { |record| record.name == name }
     end
 
     def add_record(record)
