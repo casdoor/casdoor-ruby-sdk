@@ -2,6 +2,7 @@
 
 require 'casdoor'
 require 'webmock/rspec'
+require_relative 'test_util'
 
 # The unit tests stub the HTTP requests, while the integration tests call the Casdoor of CASDOOR_TEST_ENDPOINT
 WebMock.disable_net_connect!(allow_localhost: true, allow: ENV.fetch('CASDOOR_TEST_ENDPOINT', nil))

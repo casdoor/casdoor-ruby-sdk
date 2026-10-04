@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Casdoor::Api::Auth do
+RSpec.describe Casdoor::Client do
   def self_signed_cert(key)
     cert = OpenSSL::X509::Certificate.new
     cert.version = 2
@@ -35,10 +35,10 @@ RSpec.describe Casdoor::Api::Auth do
     end
 
     it 'builds the sign-up URLs' do
-      expect(client.get_signup_url).to eq('https://door.example.com/signup/app-casbin')
-      expect(client.get_signup_url('https://app.example.com/callback', state: 'xyz'))
+      expect(client.get_signup_url(true, '')).to eq('https://door.example.com/signup/app-casbin')
+      expect(client.get_signup_url(false, 'https://app.example.com/callback'))
         .to start_with('https://door.example.com/signup/oauth/authorize?client_id=id')
-        .and end_with('&state=xyz')
+        .and end_with('&state=app-casbin')
     end
 
     it 'builds the profile URLs' do
@@ -92,7 +92,7 @@ RSpec.describe Casdoor::Api::Auth do
       stub = stub_request(:post, 'https://door.example.com/api/sso-logout?logoutAll=false')
              .with(headers: { 'Authorization' => 'Bearer at' })
              .to_return(body: { status: 'ok' }.to_json)
-      expect(client.logout('at', all_sessions: false)).to be(true)
+      expect(client.logout_current_session('at')).to be(true)
       expect(stub).to have_been_requested
     end
   end

@@ -17,8 +17,16 @@
 require_relative 'casdoor/version'
 require_relative 'casdoor/error'
 require_relative 'casdoor/entity'
-require_relative 'casdoor/api/auth'
-require_relative 'casdoor/api/crud'
-require_relative 'casdoor/api/users'
-require_relative 'casdoor/api/enforce'
-require_relative 'casdoor/client'
+require_relative 'casdoor/auth'
+require_relative 'casdoor/util'
+require_relative 'casdoor/util_modify'
+
+# The files of the APIs, the same as the casdoorsdk package of the Go SDK
+%w[
+  adapter application cert email enforce enforcer group invitation jwt ldap logout mfa model notification order
+  order_pay organization payment permission plan policy pricing product provider record resource role session sms
+  subscription syncer token transaction url user webhook
+].each { |file| require_relative "casdoor/#{file}" }
+
+# Must be the last, it delegates all the methods of Client to the module
+require_relative 'casdoor/global'

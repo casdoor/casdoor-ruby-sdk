@@ -31,9 +31,13 @@ RSpec/MultipleExpectations:
 RSpec/ExampleLength:
   Enabled: false
 
+# The integration tests are named after the APIs they test, like the tests of the Go SDK
 RSpec/DescribeClass:
-  Exclude:
-    - spec/integration_spec.rb
+  Enabled: false
+
+# The methods follow the signatures of the Go SDK
+Style/OptionalBooleanParameter:
+  Enabled: false
 
 Naming/PredicateMethod:
   Enabled: false

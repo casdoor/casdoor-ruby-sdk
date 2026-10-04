@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  rubocop:
     runs-on: ubuntu-latest
 
     steps:
@@ -64,15 +64,15 @@ jobs:
           docker logs casdoor
           exit 1
 
-      - name: Run tests
+      - name: Run Unit tests
         run: bundle exec rspec
 
       - name: Dump Casdoor logs
         if: failure()
         run: docker logs casdoor
 
-  release:
-    needs: [lint, test]
+  semantic-release:
+    needs: [test, rubocop]
     if: github.repository == 'casdoor/casdoor-ruby-sdk' && github.event_name == 'push'
     runs-on: ubuntu-latest
 

@@ -5,15 +5,9 @@
       "name": "casbin",
       "displayName": "casbin",
       "passwordType": "bcrypt",
-      "passwordOptions": [
-        "AtLeast6"
-      ],
-      "countryCodes": [
-        "US"
-      ],
-      "languages": [
-        "en"
-      ],
+      "passwordOptions": ["AtLeast6"],
+      "countryCodes": ["US"],
+      "languages": ["en"],
       "tags": [],
       "accountItems": [],
       "initScore": 2000,
@@ -24,8 +18,8 @@
   "applications": [
     {
       "owner": "admin",
-      "name": "app-vue-python-example",
-      "displayName": "app-vue-python-example",
+      "name": "app-casibase",
+      "displayName": "app-casibase",
       "category": "Default",
       "type": "All",
       "organization": "built-in",
@@ -124,7 +118,7 @@
       "isAdmin": true,
       "isForbidden": false,
       "isDeleted": false,
-      "signupApplication": "app-vue-python-example",
+      "signupApplication": "app-casibase",
       "properties": {}
     }
   ],

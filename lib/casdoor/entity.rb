@@ -17,9 +17,9 @@
 require 'json'
 
 module Casdoor
-  # An object of Casdoor, like a user or an application. It keeps all the JSON fields returned by Casdoor, so that
-  # updating an object never clears the fields that the SDK doesn't know about, and the fields added by newer
-  # Casdoor versions work without updating the SDK.
+  # An object of Casdoor, like a user or an application, the counterpart of the structs of the Go SDK. It keeps all
+  # the JSON fields returned by Casdoor, so that updating an object never clears the fields that the SDK doesn't know
+  # about, and the fields added by newer Casdoor versions work without updating the SDK.
   #
   # The fields can be read and written in snake_case, which is converted to the camelCase name used by Casdoor:
   #
@@ -38,6 +38,11 @@ module Casdoor
       key.to_s.gsub(/_([a-z\d])/) { Regexp.last_match(1).upcase }
     end
 
+    # The JSON name of a snake_case field name
+    def self.field_key(name)
+      camelize(name)
+    end
+
     def initialize(attributes = {})
       @attributes = {}
       (attributes || {}).each { |key, value| self[key] = value }
@@ -53,6 +58,11 @@ module Casdoor
 
     def key?(key)
       @attributes.key?(field_name(key))
+    end
+
+    # "owner/name", the ID of the object in the Casdoor API
+    def get_id
+      "#{self[:owner]}/#{self[:name]}"
     end
 
     def to_h
@@ -74,11 +84,11 @@ module Casdoor
     def method_missing(method_name, *args)
       field = method_name.to_s
       if field.end_with?('=') && args.length == 1
-        self[Entity.camelize(field.chomp('='))] = args.first
+        self[field.chomp('=').to_sym] = args.first
       elsif field.end_with?('?') && args.empty?
-        self[Entity.camelize(field.chomp('?'))] ? true : false
+        self[field.chomp('?').to_sym] ? true : false
       elsif args.empty? && field.match?(/\A[a-z][a-z\d_]*\z/)
-        self[Entity.camelize(field)]
+        self[method_name]
       else
         super
       end
@@ -92,44 +102,7 @@ module Casdoor
 
     # String keys are the exact names of Casdoor, while Symbol keys are snake_case
     def field_name(key)
-      key.is_a?(Symbol) ? Entity.camelize(key) : key.to_s
-    end
-  end
-
-  class Adapter < Entity; end
-  class Application < Entity; end
-  class Cert < Entity; end
-  class Enforcer < Entity; end
-  class Group < Entity; end
-  class Invitation < Entity; end
-  class Model < Entity; end
-  class Order < Entity; end
-  class Organization < Entity; end
-  class Payment < Entity; end
-  class Permission < Entity; end
-  class Plan < Entity; end
-  class Pricing < Entity; end
-  class Product < Entity; end
-  class Provider < Entity; end
-  class Resource < Entity; end
-  class Role < Entity; end
-  class Session < Entity; end
-  class Subscription < Entity; end
-  class Syncer < Entity; end
-  class Token < Entity; end
-  class Transaction < Entity; end
-  class User < Entity; end
-  class Webhook < Entity; end
-
-  # The claims of a JWT token issued by Casdoor: the fields of the user, plus the standard claims like "exp" and "aud"
-  class Claims < Entity
-    def user
-      User.new(to_h)
-    end
-
-    # Casdoor names the claim "tokenType", or "TokenType" for the "JWT-Custom" token format
-    def refresh_token?
-      (self['tokenType'] || self['TokenType']) == 'refresh-token'
+      key.is_a?(Symbol) ? self.class.field_key(key) : key.to_s
     end
   end
 end
